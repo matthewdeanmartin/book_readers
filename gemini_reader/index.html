@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cold Season - Ebook Reader</title>
+    <!-- Importing Crimson Text for that classic book feel -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- Importing Lucide Icons for UI controls -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            /* The user requested an "Ivory" paper look */
+            --paper-color: #FdfcF0;
+            --ink-color: #333333;
+            --ui-border: #d4d4d4;
+            --ui-bg: #F4F1EA;
+            --accent: #5e4b35;
+
+            --font-main: 'Crimson Text', serif;
+            --base-size: 20px;
+            --line-height: 1.6;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #3b3b3b; /* Dark background to make the "page" pop */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: var(--font-main);
+        }
+
+        /* The Device/Book Container */
+        #reader-container {
+            background-color: var(--paper-color);
+            width: 100%;
+            max-width: 550px; /* Typical paperback width relative to height */
+            height: 95vh;
+            max-height: 900px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Header / Status Bar (Optional, keeps it looking like an app) */
+        header {
+            padding: 10px 20px;
+            font-size: 0.8rem;
+            color: #888;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(0,0,0,0.03);
+            user-select: none;
+        }
+
+        /* The Main Content Area */
+        #page-content {
+            flex-grow: 1;
+            padding: 40px 50px;
+            overflow-y: auto; /* Allow scrolling if text exceeds page height */
+            color: var(--ink-color);
+            font-size: var(--base-size);
+            line-height: var(--line-height);
+            text-align: justify; /* Justified text for book feel */
+            transition: opacity 0.3s ease;
+        }
+
+        /* Hide scrollbar for cleaner UI */
+        #page-content::-webkit-scrollbar {
+            width: 6px;
+        }
+        #page-content::-webkit-scrollbar-thumb {
+            background-color: rgba(0,0,0,0.1);
+            border-radius: 3px;
+        }
+
+        /* Typography Styling */
+        h1.chapter-num {
+            text-align: center;
+            font-weight: 400;
+            font-size: 1.4em;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 0.1em;
+            color: #666;
+            margin-top: 20px;
+        }
+
+        h2.chapter-title {
+            text-align: center;
+            font-weight: 400;
+            font-size: 2.2em;
+            margin-top: 0;
+            margin-bottom: 40px;
+            color: #111;
+        }
+
+        /* Illustration Placeholder */
+        .illustration-box {
+            width: 100%;
+            height: 150px;
+            margin: 20px 0 40px 0;
+            border: 1px dashed #aaa;
+            background-color: rgba(0,0,0,0.03);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #777;
+            font-style: italic;
+        }
+
+        p {
+            margin-bottom: 0;
+            margin-top: 0;
+            text-indent: 1.5em; /* Standard book indentation */
+        }
+
+        /* Spacing between paragraphs for dialogue is sometimes preferred,
+           but strict books usually just indent. I'll add a tiny margin for readability on screen. */
+        p + p {
+            margin-top: 0.5em;
+        }
+
+        /* The "First Line" styling */
+        .no-indent {
+            text-indent: 0;
+        }
+
+        .drop-cap {
+            float: left;
+            font-size: 3.5em;
+            line-height: 0.8;
+            padding-top: 4px;
+            padding-right: 8px;
+            padding-left: 3px;
+            font-weight: 700;
+        }
+
+        .small-caps {
+            font-variant: small-caps;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        /* Controls Area */
+        #controls {
+            background-color: var(--ui-bg);
+            border-top: 1px solid #e0e0e0;
+            padding: 20px 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 10;
+        }
+
+        .read-btn {
+            background-color: var(--ink-color);
+            color: var(--paper-color);
+            border: none;
+            padding: 15px;
+            font-family: var(--font-main);
+            font-size: 1.1rem;
+            cursor: pointer;
+            border-radius: 4px;
+            width: 100%;
+            transition: transform 0.1s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .read-btn:active {
+            transform: scale(0.98);
+        }
+
+        .read-btn:disabled {
+            background-color: #aaa;
+            cursor: not-allowed;
+        }
+
+        .secondary-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .text-btn {
+            background: none;
+            border: 1px solid #ccc;
+            color: #555;
+            padding: 5px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: sans-serif;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .text-btn:hover {
+            background-color: #e9e9e9;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-family: var(--font-main);
+            font-size: 1rem;
+            text-decoration: underline;
+            padding: 0;
+        }
+        .back-btn:disabled {
+            color: #ccc;
+            text-decoration: none;
+            cursor: default;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            #reader-container { height: 100vh; max-height: none; border-radius: 0; width: 100%; }
+            #page-content { padding: 30px 25px; }
+            h2.chapter-title { font-size: 1.8em; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="reader-container">
+        <!-- Optional "App" Header -->
+        <header>
+            <span>My Library</span>
+            <span>Prototype v1.0</span>
+        </header>
+
+        <div id="page-content">
+            <!-- Content injects here via JS -->
+        </div>
+
+        <div id="controls">
+            <!-- Main Action Button -->
+            <button id="btn-next" class="read-btn" onclick="nextPage()">
+                Read for more?
+            </button>
+
+            <!-- Secondary Controls (Back + Text Size) -->
+            <div class="secondary-controls">
+                <button id="btn-prev" class="back-btn" onclick="prevPage()">Back</button>
+
+                <div style="display:flex; gap:5px;">
+                    <button class="text-btn" onclick="adjustSize(-2)" aria-label="Decrease font size">
+                        <i data-lucide="minus" width="14"></i> A
+                    </button>
+                    <button class="text-btn" onclick="adjustSize(2)" aria-label="Increase font size">
+                        A <i data-lucide="plus" width="14"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. STORY DATA ---
+        // I've paginated the text you provided into an array.
+        // You can edit the HTML inside the backticks.
+
+        const pages = [
+            // PAGE 1
+            `
+            <h1 class="chapter-num">Chapter 1</h1>
+            <h2 class="chapter-title">Cold Season</h2>
+
+            <div class="illustration-box">
+                [Illustration: A snowy window or a school bell]
+            </div>
+
+            <p class="no-indent">
+                <span class="opening-phrase">“Why do you always lose stuff, Alex?”</span> said Shawn.
+            </p>
+            <p>“I don’t know, my stuff is always running away I guess.”</p>
+
+            <br>
+            <p style="text-align:center; font-style:italic;">RING RING! Annoying RINGING BELL sounds!</p>
+            <br>
+
+            <p>“See ya later Shawn.”</p>
+            <p>“Bye Alex.”</p>
+            <p>Today me and my friends are meeting at my house, Shawn and Alisha. My first class is math. Math is my least favorite out of all the subjects and today we have a test I need to get a good score on it in just one week Alisha is inviting me to a trip to Norway.</p>
+            `,
+
+            // PAGE 2
+            `
+            <p class="no-indent">Shawn is allowed to go but I can’t; I’ve been doing bad on all of my tests. If I get an 85 or above my mom will let me go.</p>
+
+            <p>“Everyone we have been studying for this test I expect for you all to get a good score,” says Ms. G the math teacher.</p>
+
+            <p>Me and probably all the other kids are stressing. I heard this test is extremely hard. Alisha doesn't need to do it in case she's a grade down from me and Shawn.</p>
+
+            <br><p style="text-align:center">*** One hour later ***</p><br>
+
+            <p>I get startled when Ms. G says "Everyone please turn in your tests, time's up.”</p>
+            <p>So how do you think you got on the test? asks Shawn.</p>
+            <p>“Not sure I hope I did good.”</p>
+            `,
+
+            // PAGE 3
+            `
+            <p class="no-indent">“Guys don’t leave me! Oh are we still going to Norway?”</p>
+            <p>“My parents said yes as long as I call them regularly and be polite there," said Shawn.</p>
+            <p>“Alex how about you?”</p>
+            <p>“Only if I get a good score on this test.”</p>
+            <p>“Well let's hope for the best!”</p>
+
+            <p>Two regular days has passed and I got an 85 on my test! Yay. We all go over to Shawn's house after he picks up his little sister, Molly from her elementary school.</p>
+
+            <p>“Follow me” Shawn tells me and Alisha we all go into his bedroom. Earlier we were talking about the vacation Alisha was letting us come on so now we're planning it all out in a notebook Alisha brought over.</p>
+            `,
+
+            // PAGE 4
+            `
+            <p class="no-indent">“So we got our plane tickets and we get there then go into our rooms. What next?” says Alisha.</p>
+            <p>“I heard there's a zoo there maybe we can go and look at the animals over there.” I say.</p>
+            <p>“Oooh yeh I wanna see the pandas there!” Shawn exclaimed.</p>
+            <p>“Ok we’ll go to the zoo.”</p>
+
+            <p>A few minutes has passed and Alisha leaves and I go home. “Mom I'm home,” I say.</p>
+            <p>“You came just in time for dinner, Alex. What did you get on the test?”</p>
+            <p>“I got a 85.”</p>
+            <p>“Wow you barely passed but a deal is a deal.”</p>
+            `,
+
+            // PAGE 5
+            `
+            <p class="no-indent">“You'll soon be going on that trip with your friends in about two more days. You should start packing up.”</p>
+            <p>“Ok I’ll start after dinner. I'm so glad it's winter break now I can rest and have no more homework.”</p>
+
+            <p>The next day me, Shawn, and Alisha go to the supermarket I work at. My boss asked if I could lock up for the night. I tell my friends to stay right by the door while I go do the things my boss asked me to do.</p>
+
+            <p>It’s snowing outside and I don’t want them to be in the snow. It's like about 2 inches. The weather forecast didn’t say anything about the snow getting more than 3 inches. A few minutes go by. I go back to tell my friends we’re going and i’m done but then I saw outside.</p>
+            `,
+
+            // PAGE 6
+            `
+            <p class="no-indent">“I'm done let's leave now… AGH how is there so much snow!” I exclaimed.</p>
+            <p>Alisha and Shawn turn around.</p>
+            <p>“Oh my gosh thats much more snow than earlier!” says Alisha.</p>
+            <p>Shawn tries to to open the door but it doesn't move.</p>
+
+            <p>“Oh no! Are we trapped in here! This is not how I wanted to spend my winter break.”</p>
+            <p>“It's fine the snow will stop soon. We just need to wait and relax. Someone will get us eventually.” I tell them.</p>
+            <p>Shawn is still trying to open the door and Alesha is trying to call for help.</p>
+
+            <p>“I know this place like the back of my hand. Maybe there's something to help us with.”</p>
+
+            <div style="text-align: center; margin-top: 40px; color: #888;">
+                &mdash; To Be Continued &mdash;
+            </div>
+            `
+        ];
+
+        const nextButtonMessages = [
+            "Read for more?",
+            "What's going on?",
+            "What'll happen next?",
+            "Continue story...",
+            "Turn page"
+        ];
+
+        // --- 2. LOGIC ---
+
+        let currentPageIndex = 0;
+        let currentFontSize = 20; // Default matches CSS variable
+
+        // DOM Elements
+        const contentDiv = document.getElementById('page-content');
+        const nextBtn = document.getElementById('btn-next');
+        const prevBtn = document.getElementById('btn-prev');
+        const readerContainer = document.getElementById('reader-container');
+
+        // Initialize Icons
+        lucide.createIcons();
+
+        function renderPage() {
+            // Fade out
+            contentDiv.style.opacity = 0;
+
+            setTimeout(() => {
+                // Update content
+                contentDiv.innerHTML = pages[currentPageIndex];
+
+                // Reset scroll
+                contentDiv.scrollTop = 0;
+
+                // Fade in
+                contentDiv.style.opacity = 1;
+
+                // Update Button States
+                updateControls();
+            }, 200);
+        }
+
+        function updateControls() {
+            // Handle Back Button
+            if (currentPageIndex === 0) {
+                prevBtn.disabled = true;
+                prevBtn.style.opacity = 0.5;
+            } else {
+                prevBtn.disabled = false;
+                prevBtn.style.opacity = 1;
+            }
+
+            // Handle Next Button Text & State
+            if (currentPageIndex === pages.length - 1) {
+                nextBtn.innerText = "End of Chapter";
+                nextBtn.disabled = true;
+                nextBtn.style.backgroundColor = "#888";
+            } else {
+                nextBtn.disabled = false;
+                nextBtn.style.backgroundColor = "var(--ink-color)";
+                // Get random message
+                const randomMsg = nextButtonMessages[Math.floor(Math.random() * nextButtonMessages.length)];
+                nextBtn.innerText = randomMsg;
+            }
+        }
+
+        function nextPage() {
+            if (currentPageIndex < pages.length - 1) {
+                currentPageIndex++;
+                renderPage();
+            }
+        }
+
+        function prevPage() {
+            if (currentPageIndex > 0) {
+                currentPageIndex--;
+                renderPage();
+            }
+        }
+
+        function adjustSize(delta) {
+            currentFontSize += delta;
+            // Clamp font size
+            if (currentFontSize < 14) currentFontSize = 14;
+            if (currentFontSize > 32) currentFontSize = 32;
+
+            document.documentElement.style.setProperty('--base-size', currentFontSize + 'px');
+        }
+
+        // Start
+        renderPage();
+
+    </script>
+</body>
+</html>
