@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>K-Night - Ebook Reader</title>
+    <title>K-Night - Fixed Reader</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
@@ -13,31 +13,22 @@
         :root {
             --paper-color: #FdfcF0;
             --ink-color: #333333;
-            --ui-border: #d4d4d4;
             --ui-bg: #F4F1EA;
-            --accent: #5e4b35;
-
             --font-main: 'Crimson Text', serif;
             --base-size: 20px;
             --line-height: 1.6;
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         body {
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
             background-color: #3b3b3b;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            display: flex; justify-content: center; align-items: center;
             min-height: 100vh;
             font-family: var(--font-main);
         }
 
-        /* The Device/Book Container */
         #reader-container {
             background-color: var(--paper-color);
             width: 100%;
@@ -49,147 +40,91 @@
             box-shadow: 0 20px 50px rgba(0,0,0,0.5);
             border-radius: 6px;
             position: relative;
-            overflow: hidden;
         }
 
-        /* Header / Status Bar */
         header {
             padding: 10px 20px;
             font-size: 0.9rem;
             color: #888;
-            display: flex;
-            justify-content: space-between;
+            display: flex; justify-content: space-between;
             border-bottom: 1px solid rgba(0,0,0,0.05);
-            user-select: none;
-            font-family: sans-serif;
+            flex-shrink: 0; font-family: sans-serif;
         }
 
-        /* The Main Content Area */
-        #page-content {
+        /* --- LAYOUT AREA --- */
+        #page-viewport {
             flex-grow: 1;
+            position: relative;
             padding: 40px 50px;
-            overflow-y: auto;
+            overflow: hidden; /* No scrolling allowed */
+        }
+
+        /* The text the user sees */
+        #visible-content {
+            height: 100%;
+            width: 100%;
             color: var(--ink-color);
             font-size: var(--base-size);
             line-height: var(--line-height);
             text-align: justify;
-            transition: opacity 0.3s ease;
         }
 
-        /* Hide scrollbar for cleaner UI */
-        #page-content::-webkit-scrollbar { width: 6px; }
-        #page-content::-webkit-scrollbar-thumb { background-color: rgba(0,0,0,0.1); border-radius: 3px; }
+        /* The invisible testing laboratory */
+        #measure-chamber {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            /* IMPORTANT: No fixed height here, we measure its growth */
+            visibility: hidden;
+            z-index: -100;
+            padding: 40px 50px; /* MUST match viewport padding exactly */
+            font-size: var(--base-size);
+            line-height: var(--line-height);
+        }
 
-        /* Typography Styling */
+        /* --- TYPOGRAPHY --- */
+        h1, h2, p, .dialogue-line { margin-bottom: 0.5em; margin-top: 0; }
+
         h1.chapter-num {
-            text-align: center;
-            font-weight: 400;
-            font-size: 1.2em;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-bottom: 0.1em;
-            color: #666;
-            margin-top: 10px;
+            text-align: center; font-size: 1.2em;
+            text-transform: uppercase; color: #666; margin-top: 10px;
         }
-
         h2.chapter-title {
-            text-align: center;
-            font-weight: 400;
-            font-size: 2.2em;
-            margin-top: 0;
-            margin-bottom: 30px;
-            color: #111;
+            text-align: center; font-size: 2.2em;
+            margin-bottom: 30px; color: #111;
         }
+        .speaker { font-weight: bold; font-variant: small-caps; margin-right: 5px; }
+        .scene-break { text-align: center; margin: 20px 0; color: #888; letter-spacing: 3px; }
 
-        p {
-            margin-bottom: 0.5em;
-            margin-top: 0;
-        }
-
-        .dialogue-line {
-            margin-bottom: 0.8em;
-            display: block;
-        }
-
-        .speaker {
-            font-weight: bold;
-            font-variant: small-caps;
-            margin-right: 5px;
-        }
-
-        .scene-break {
-            text-align: center;
-            margin: 20px 0;
-            color: #888;
-            letter-spacing: 3px;
-        }
-
-        /* Controls Area */
+        /* --- CONTROLS --- */
         #controls {
             background-color: var(--ui-bg);
             border-top: 1px solid #e0e0e0;
             padding: 20px 30px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            z-index: 10;
+            display: flex; flex-direction: column; gap: 15px;
+            flex-shrink: 0;
         }
-
         .read-btn {
-            background-color: var(--ink-color);
-            color: var(--paper-color);
-            border: none;
-            padding: 15px;
-            font-family: var(--font-main);
-            font-size: 1.1rem;
-            cursor: pointer;
-            border-radius: 4px;
-            width: 100%;
-            transition: transform 0.1s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            background-color: var(--ink-color); color: var(--paper-color);
+            border: none; padding: 15px; font-family: var(--font-main);
+            font-size: 1.1rem; cursor: pointer; border-radius: 4px; width: 100%;
         }
-
-        .read-btn:active { transform: scale(0.98); }
         .read-btn:disabled { background-color: #aaa; cursor: not-allowed; }
-
-        .secondary-controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
+        .secondary-controls { display: flex; justify-content: space-between; align-items: center; }
         .text-btn {
-            background: none;
-            border: 1px solid #ccc;
-            color: #555;
-            padding: 5px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-family: sans-serif;
-            font-size: 0.8rem;
-            display: flex;
-            align-items: center;
-            gap: 5px;
+            background: none; border: 1px solid #ccc; color: #555;
+            padding: 5px 12px; border-radius: 4px; cursor: pointer;
+            font-family: sans-serif; font-size: 0.8rem;
+            display: flex; align-items: center; gap: 5px;
         }
-        .text-btn:hover { background-color: #e9e9e9; }
-
         .back-btn {
-            background: none;
-            border: none;
-            color: #666;
-            cursor: pointer;
-            font-family: var(--font-main);
-            font-size: 1rem;
-            text-decoration: underline;
-            padding: 0;
+            background: none; border: none; color: #666; cursor: pointer;
+            font-family: var(--font-main); font-size: 1rem; text-decoration: underline;
         }
-        .back-btn:disabled { color: #ccc; text-decoration: none; cursor: default; }
 
-        /* Mobile Adjustments */
         @media (max-width: 600px) {
-            #reader-container { height: 100vh; max-height: none; border-radius: 0; width: 100%; }
-            #page-content { padding: 30px 25px; }
-            h2.chapter-title { font-size: 1.8em; }
+            #reader-container { height: 100vh; max-height: none; border-radius: 0; }
+            #page-viewport, #measure-chamber { padding: 30px 25px; }
         }
     </style>
 </head>
@@ -197,38 +132,29 @@
 
     <div id="reader-container">
         <header>
-            <span><a href="index.html">My Library</a></span>
-            <span>Page <span id="page-num-display">1</span></span>
+            <span><a href="index.html" style="color:inherit; text-decoration:none;">My Library</a></span>
+            <span>Page <span id="page-num">1</span> / <span id="total-pages">--</span></span>
         </header>
 
-        <div id="page-content">
-            </div>
+        <div id="page-viewport">
+            <div id="visible-content"></div>
+            <div id="measure-chamber"></div>
+        </div>
 
         <div id="controls">
-            <button id="btn-next" class="read-btn" onclick="nextPage()">
-                Turn Page
-            </button>
-
+            <button id="btn-next" class="read-btn" onclick="turnPage(1)">Turn Page</button>
             <div class="secondary-controls">
-                <button id="btn-prev" class="back-btn" onclick="prevPage()">Back</button>
-
+                <button id="btn-prev" class="back-btn" onclick="turnPage(-1)">Back</button>
                 <div style="display:flex; gap:5px;">
-                    <button class="text-btn" onclick="adjustSize(-2)" aria-label="Decrease font size">
-                        <i data-lucide="minus" width="14"></i> A
-                    </button>
-                    <button class="text-btn" onclick="adjustSize(2)" aria-label="Increase font size">
-                        A <i data-lucide="plus" width="14"></i>
-                    </button>
+                    <button class="text-btn" onclick="resizeFont(-2)"><i data-lucide="minus" width="14"></i> A</button>
+                    <button class="text-btn" onclick="resizeFont(2)">A <i data-lucide="plus" width="14"></i></button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- 1. STORY DATA ---
-        const pages = [
-            // PAGE 1: Intro & The Cat
-            `
+        const rawStoryHTML = `
             <h1 class="chapter-num">Short Story</h1>
             <h2 class="chapter-title">K-Night 🐱🌕</h2>
             <p style="text-align: center; margin-bottom: 20px;">By Eloise Martin</p>
@@ -245,10 +171,9 @@
             <div class="dialogue-line"><span class="speaker">Heather:</span> “Wow, that's a cool bald spot.”</div>
             <p>I stared in awe.</p>
             <div class="dialogue-line"><span class="speaker">Heather:</span> “GAAAAAA! I'm late! Bye, kitty!! Omg, omg, omg!”</div>
-            `,
 
-            // PAGE 2: Home & Dress Choice
-            `
+            <div class="scene-break">***</div>
+
             <div class="dialogue-line"><span class="speaker">Heather:</span> “Mom I'm back and I got the groceries.”</div>
             <div class="dialogue-line"><span class="speaker">Mom:</span> “Good you came back, it's almost time for the party.”</div>
             <div class="dialogue-line"><span class="speaker">Heather:</span> “Ugggh can I just stay in my room and then come back when the party's over?”</div>
@@ -262,10 +187,7 @@
             <div class="dialogue-line"><span class="speaker">Malory:</span> “To help you get ready for your party. You asked me to come yesterday.”</div>
             <div class="dialogue-line"><span class="speaker">Heather:</span> “Oh yes thank you for coming, Mal.”</div>
             <div class="dialogue-line"><span class="speaker">Malory:</span> “I'll get the hair supply and makeup.”</div>
-            `,
 
-            // PAGE 3: The Talking Cat
-            `
             <p>I got ready for the party my Mom is throwing. I picked the orange dress and went up to my room once Malory left. I picked up my drawing pad and drew a cute cat girl fighting a dark, evil villain. <em>If only it was real,</em> I thought.</p>
 
             <div class="dialogue-line"><span class="speaker">???:</span> “Hello, Heather.”</div>
@@ -276,10 +198,7 @@
             <div class="dialogue-line"><span class="speaker">Lemon:</span> “Nope, not a dream. But anyways I need to get going but I will meet you at night at your window to talk. Bye mew!”</div>
 
             <p><em>*jumps out window*</em></p>
-            `,
 
-            // PAGE 4: Hide and Seek
-            `
             <div class="dialogue-line"><span class="speaker">Mom:</span> “Strange! Heather come down here it's almost time for the party!” my Mom yelled to me.</div>
             <div class="dialogue-line"><span class="speaker">Heather:</span> “Coming!” I shouted back.</div>
 
@@ -294,10 +213,6 @@
             <div class="dialogue-line"><span class="speaker">Heather:</span> “Yes Mom.”</div>
 
             <p>I saw him run upstairs. I checked the bathroom, bedrooms, and the old dusty attic but nowhere to be seen. The last place I need to check is the closets.</p>
-            `,
-
-            // PAGE 5: Finding Hunter
-            `
             <p>I checked my closet, Mom and Dad's closet, not there. Getting worried, I checked the basement to check if he ran down there behind my back. I looked every place in the house but nowhere to be seen.</p>
             <p>Getting worried, I told Mom about it. Just when she was going to reply with a worried look, the doorbell rang. I went to get it. Not to my surprise it was my Aunt Lia. She always comes first to anywhere.</p>
 
@@ -315,10 +230,8 @@
             <div class="dialogue-line"><span class="speaker">Hunter:</span> “I was hiding in the small corner behind the boxes.”</div>
 
             <p>Then they ran off to play.</p>
-            `,
 
-            // PAGE 6: Lemon Returns
-            `
+            <div class="scene-break">***</div>
             <p>But then I see the same cat walking down the sidewalk.</p>
             <div class="dialogue-line"><span class="speaker">Heather:</span> “(gasp) Lemon,” she said in a soft, quiet voice.</div>
             <div class="dialogue-line"><span class="speaker">Aunt Lia:</span> “Lemons? Oh, did your Mom tell you how me, your mother and your grandma are making Lemonade?”</div>
@@ -336,10 +249,6 @@
             <div class="dialogue-line"><span class="speaker">Heather:</span> “Ok, cool just keep hidden. Ok I need to go bye.”</div>
 
             <p>As I went back to my house I saw Lemon going behind a bush.</p>
-            `,
-
-            // PAGE 7: The Guests Arrive
-            `
             <div class="dialogue-line"><span class="speaker">Heather:</span> “I'm back.”</div>
             <div class="dialogue-line"><span class="speaker">Dad:</span> “And in front! Ha ha ha.”</div>
             <div class="dialogue-line"><span class="speaker">Heather, Mom, Lia:</span> “Please don't do that again.”</div>
@@ -360,10 +269,7 @@
             <p><em>But Lemon has a mark on her tail too,</em> I thought.</p>
             <div class="dialogue-line"><span class="speaker">Grace:</span> “Do you want to see him?”</div>
             <div class="dialogue-line"><span class="speaker">Heather:</span> “Sure, one day.”</div>
-            `,
 
-            // PAGE 8: The Earthquake
-            `
             <div class="dialogue-line"><span class="speaker">Heather:</span> “Sup, Jake.”</div>
             <div class="dialogue-line"><span class="speaker">Jake:</span> “Sup.”</div>
             <p>Jake is 15 years old and loves playing video games all the time. And of course he went back to his phone after he said hi.</p>
@@ -376,7 +282,6 @@
             <p>Grace and I went to my bedroom and played for a bit. Then the doorbell rang again. It was Grandpa and Grandma.</p>
 
             <div class="scene-break">***</div>
-
             <p>We talked for a bit, everyone else came, and we started the party. But then...</p>
             <p style="text-align:center; font-weight:bold; font-size:1.2em;">WAM!!!</p>
             <p>The entire house shook. Me and my Dad went down and we weren't the only ones that felt it.</p>
@@ -387,10 +292,7 @@
             <div class="dialogue-line"><span class="speaker">Heather:</span> “What was that?!”</div>
 
             <p>I see Lemon pass by looking at me like I need to follow her. So I say I need to go and ran to Lemon.</p>
-            `,
 
-            // PAGE 9: The Aftermath
-            `
             <div class="dialogue-line"><span class="speaker">Heather:</span> “What's going on!”</div>
             <div class="dialogue-line"><span class="speaker">Lemon:</span> “I don't know. It looks like an earthquake, but it can't be one. It can't happen in this place. It's impossible.”</div>
             <div class="dialogue-line"><span class="speaker">Heather:</span> “Then what?!”</div>
@@ -408,10 +310,7 @@
             <div class="dialogue-line"><span class="speaker">Hunter:</span> “WOW, cool!”</div>
             <div class="dialogue-line"><span class="speaker">Heather:</span> “We should look around for anyone.”</div>
             <div class="dialogue-line"><span class="speaker">Lemon:</span> “Meow.”</div>
-            `,
 
-            // PAGE 10: The Cliffhanger
-            `
             <p>We checked other houses, but we didn't find anyone so we went inside our house to get supplies.</p>
             <div class="dialogue-line"><span class="speaker">Hunter:</span> “Will we see Mommy, Daddy, or maybe even Bobby?”</div>
             <div class="dialogue-line"><span class="speaker">Heather:</span> “I don't know. Are you hungry?”</div>
@@ -436,73 +335,129 @@
             <div class="dialogue-line"><span class="speaker">Lemon:</span> (Face of horror 😱)</div>
 
             <h2 style="text-align:center; margin-top:50px;">To Be Continued...</h2>
-            `
-        ];
+        `;
 
-        // --- 2. LOGIC ---
-        let currentPageIndex = 0;
         let currentFontSize = 20;
+        let currentPageIndex = 0;
+        let pages = [];
 
-        const contentDiv = document.getElementById('page-content');
+        const visibleContent = document.getElementById('visible-content');
+        const measureChamber = document.getElementById('measure-chamber');
+        const viewport = document.getElementById('page-viewport'); // We use this for height limit
         const nextBtn = document.getElementById('btn-next');
         const prevBtn = document.getElementById('btn-prev');
-        const pageNumDisplay = document.getElementById('page-num-display');
+        const pageNumDisplay = document.getElementById('page-num');
+        const totalPagesDisplay = document.getElementById('total-pages');
 
         lucide.createIcons();
 
-        function renderPage() {
-            contentDiv.style.opacity = 0;
-            setTimeout(() => {
-                contentDiv.innerHTML = pages[currentPageIndex];
-                pageNumDisplay.innerText = currentPageIndex + 1;
-                contentDiv.scrollTop = 0;
-                contentDiv.style.opacity = 1;
-                updateControls();
-            }, 200);
-        }
+        function paginateContent() {
+            // 1. Convert string HTML to DOM nodes
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(rawStoryHTML, 'text/html');
+            const elements = Array.from(doc.body.children);
 
-        function updateControls() {
-            if (currentPageIndex === 0) {
-                prevBtn.disabled = true;
-                prevBtn.style.opacity = 0.5;
-            } else {
-                prevBtn.disabled = false;
-                prevBtn.style.opacity = 1;
+            // 2. Reset
+            pages = [];
+            measureChamber.innerHTML = '';
+
+            // 3. Get exact height of the viewing area
+            // We use the VIEWPORT height (minus padding) as the hard limit
+            const viewportStyle = window.getComputedStyle(viewport);
+            const paddingTop = parseFloat(viewportStyle.paddingTop);
+            const paddingBottom = parseFloat(viewportStyle.paddingBottom);
+
+            // The max height is the container height MINUS the padding
+            // (Because the measure chamber is placed INSIDE the padding box)
+            const maxHeight = viewport.clientHeight - paddingTop - paddingBottom;
+
+            let currentPageNodes = [];
+
+            elements.forEach(el => {
+                const clone = el.cloneNode(true);
+                measureChamber.appendChild(clone);
+
+                // 4. Compare scrollHeight (content) vs maxHeight (container limit)
+                // We assume the chamber has no fixed height, so scrollHeight = total content height
+                if (measureChamber.scrollHeight > maxHeight) {
+
+                    // IF it doesn't fit...
+                    if (currentPageNodes.length > 0) {
+                        pages.push(currentPageNodes);
+                    }
+
+                    // Reset for next page
+                    currentPageNodes = [];
+                    measureChamber.innerHTML = '';
+                    measureChamber.appendChild(clone); // Add the item that didn't fit to new page
+                    currentPageNodes.push(el);
+                } else {
+                    // IF it fits...
+                    currentPageNodes.push(el);
+                }
+            });
+
+            if (currentPageNodes.length > 0) {
+                pages.push(currentPageNodes);
             }
 
-            if (currentPageIndex === pages.length - 1) {
+            measureChamber.innerHTML = '';
+
+            if (currentPageIndex >= pages.length) currentPageIndex = pages.length - 1;
+            renderPage();
+        }
+
+        function renderPage() {
+            visibleContent.innerHTML = '';
+
+            if (pages.length > 0) {
+                const nodes = pages[currentPageIndex];
+                nodes.forEach(node => {
+                    visibleContent.appendChild(node.cloneNode(true));
+                });
+            }
+
+            pageNumDisplay.innerText = currentPageIndex + 1;
+            totalPagesDisplay.innerText = pages.length;
+
+            prevBtn.disabled = currentPageIndex === 0;
+            if (currentPageIndex >= pages.length - 1) {
                 nextBtn.innerText = "End of Chapter";
                 nextBtn.disabled = true;
                 nextBtn.style.backgroundColor = "#888";
             } else {
+                nextBtn.innerText = "Turn Page";
                 nextBtn.disabled = false;
                 nextBtn.style.backgroundColor = "var(--ink-color)";
-                nextBtn.innerText = "Turn Page";
             }
         }
 
-        function nextPage() {
-            if (currentPageIndex < pages.length - 1) {
-                currentPageIndex++;
+        function turnPage(direction) {
+            const newIndex = currentPageIndex + direction;
+            if (newIndex >= 0 && newIndex < pages.length) {
+                currentPageIndex = newIndex;
                 renderPage();
             }
         }
 
-        function prevPage() {
-            if (currentPageIndex > 0) {
-                currentPageIndex--;
-                renderPage();
-            }
-        }
-
-        function adjustSize(delta) {
+        function resizeFont(delta) {
             currentFontSize += delta;
             if (currentFontSize < 14) currentFontSize = 14;
             if (currentFontSize > 32) currentFontSize = 32;
             document.documentElement.style.setProperty('--base-size', currentFontSize + 'px');
+            setTimeout(paginateContent, 50);
         }
 
-        renderPage();
+        // Wait for fonts/CSS to load to get accurate measurements
+        window.onload = () => {
+            paginateContent();
+        };
+
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(paginateContent, 100);
+        });
     </script>
 </body>
 </html>

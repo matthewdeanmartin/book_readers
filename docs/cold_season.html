@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cold Season - Ebook Reader</title>
+    <title>Cold Season - Smart Reader</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
@@ -16,28 +16,21 @@
             --ui-border: #d4d4d4;
             --ui-bg: #F4F1EA;
             --accent: #5e4b35;
-
             --font-main: 'Crimson Text', serif;
             --base-size: 20px;
             --line-height: 1.6;
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         body {
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
             background-color: #3b3b3b;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            display: flex; justify-content: center; align-items: center;
             min-height: 100vh;
             font-family: var(--font-main);
         }
 
-        /* The Device/Book Container */
         #reader-container {
             background-color: var(--paper-color);
             width: 100%;
@@ -52,162 +45,95 @@
             overflow: hidden;
         }
 
-        /* Header / Status Bar */
         header {
             padding: 10px 20px;
             font-size: 0.9rem;
             color: #888;
-            display: flex;
-            justify-content: space-between;
+            display: flex; justify-content: space-between;
             border-bottom: 1px solid rgba(0,0,0,0.05);
-            user-select: none;
+            flex-shrink: 0;
             font-family: sans-serif;
         }
 
-        /* The Main Content Area */
-        #page-content {
+        /* --- THE VIEWPORT --- */
+        #page-viewport {
             flex-grow: 1;
+            position: relative;
             padding: 40px 50px;
-            overflow-y: auto;
+            overflow: hidden; /* No scrolling allowed */
+        }
+
+        /* The text the user sees */
+        #visible-content {
+            height: 100%;
+            width: 100%;
             color: var(--ink-color);
             font-size: var(--base-size);
             line-height: var(--line-height);
             text-align: justify;
-            transition: opacity 0.3s ease;
         }
 
-        /* Hide scrollbar for cleaner UI */
-        #page-content::-webkit-scrollbar {
-            width: 6px;
-        }
-        #page-content::-webkit-scrollbar-thumb {
-            background-color: rgba(0,0,0,0.1);
-            border-radius: 3px;
+        /* The invisible testing laboratory */
+        #measure-chamber {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            visibility: hidden;
+            z-index: -100;
+            padding: 40px 50px; /* MUST match viewport padding exactly */
+            font-size: var(--base-size);
+            line-height: var(--line-height);
         }
 
-        /* Typography Styling */
+        /* --- TYPOGRAPHY --- */
         h1.chapter-num {
-            text-align: center;
-            font-weight: 400;
-            font-size: 1.2em;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-bottom: 0.1em;
-            color: #666;
-            margin-top: 10px;
+            text-align: center; font-weight: 400; font-size: 1.2em;
+            letter-spacing: 2px; text-transform: uppercase;
+            margin-bottom: 0.1em; color: #666; margin-top: 10px;
         }
-
         h2.chapter-title {
-            text-align: center;
-            font-weight: 400;
-            font-size: 2.2em;
-            margin-top: 0;
-            margin-bottom: 30px;
-            color: #111;
+            text-align: center; font-weight: 400; font-size: 2.2em;
+            margin-top: 0; margin-bottom: 30px; color: #111;
         }
+        p { margin-bottom: 0; margin-top: 0; text-indent: 1.5em; }
+        p + p { margin-top: 0.5em; }
+        .no-indent { text-indent: 0; }
+        .scene-break { text-align: center; margin: 20px 0; color: #888; letter-spacing: 3px; }
 
-        p {
-            margin-bottom: 0;
-            margin-top: 0;
-            text-indent: 1.5em;
-        }
-
-        /* Add a little space between dialogue lines for readability */
-        p + p {
-            margin-top: 0.5em;
-        }
-
-        .no-indent {
-            text-indent: 0;
-        }
-
-        .scene-break {
-            text-align: center;
-            margin: 20px 0;
-            color: #888;
-            letter-spacing: 3px;
-        }
-
-        /* Controls Area */
+        /* --- CONTROLS --- */
         #controls {
             background-color: var(--ui-bg);
             border-top: 1px solid #e0e0e0;
             padding: 20px 30px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+            display: flex; flex-direction: column; gap: 15px;
+            flex-shrink: 0;
             z-index: 10;
         }
-
         .read-btn {
-            background-color: var(--ink-color);
-            color: var(--paper-color);
-            border: none;
-            padding: 15px;
-            font-family: var(--font-main);
-            font-size: 1.1rem;
-            cursor: pointer;
-            border-radius: 4px;
-            width: 100%;
-            transition: transform 0.1s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            position: relative;
-            overflow: hidden;
+            background-color: var(--ink-color); color: var(--paper-color);
+            border: none; padding: 15px; font-family: var(--font-main);
+            font-size: 1.1rem; cursor: pointer; border-radius: 4px;
+            width: 100%; transition: transform 0.1s;
         }
+        .read-btn:active { transform: scale(0.98); }
+        .read-btn:disabled { background-color: #aaa; cursor: not-allowed; }
 
-        .read-btn:active {
-            transform: scale(0.98);
-        }
-
-        .read-btn:disabled {
-            background-color: #aaa;
-            cursor: not-allowed;
-        }
-
-        .secondary-controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
+        .secondary-controls { display: flex; justify-content: space-between; align-items: center; }
         .text-btn {
-            background: none;
-            border: 1px solid #ccc;
-            color: #555;
-            padding: 5px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-family: sans-serif;
-            font-size: 0.8rem;
-            display: flex;
-            align-items: center;
-            gap: 5px;
+            background: none; border: 1px solid #ccc; color: #555;
+            padding: 5px 12px; border-radius: 4px; cursor: pointer;
+            font-family: sans-serif; font-size: 0.8rem;
+            display: flex; align-items: center; gap: 5px;
         }
-
-        .text-btn:hover {
-            background-color: #e9e9e9;
-        }
-
         .back-btn {
-            background: none;
-            border: none;
-            color: #666;
-            cursor: pointer;
-            font-family: var(--font-main);
-            font-size: 1rem;
-            text-decoration: underline;
-            padding: 0;
+            background: none; border: none; color: #666; cursor: pointer;
+            font-family: var(--font-main); font-size: 1rem; text-decoration: underline;
         }
-        .back-btn:disabled {
-            color: #ccc;
-            text-decoration: none;
-            cursor: default;
-        }
+        .back-btn:disabled { color: #ccc; text-decoration: none; cursor: default; }
 
-        /* Mobile Adjustments */
         @media (max-width: 600px) {
-            #reader-container { height: 100vh; max-height: none; border-radius: 0; width: 100%; }
-            #page-content { padding: 30px 25px; }
+            #reader-container { height: 100vh; max-height: none; border-radius: 0; }
+            #page-viewport, #measure-chamber { padding: 30px 25px; }
             h2.chapter-title { font-size: 1.8em; }
         }
     </style>
@@ -216,26 +142,28 @@
 
     <div id="reader-container">
         <header>
-            <span><a href="index.html">My Library</a></span>
-            <span>Page <span id="page-num-display">1</span></span>
+            <span><a href="index.html" style="color:inherit; text-decoration:none;">My Library</a></span>
+            <span>Page <span id="page-num-display">1</span> / <span id="total-pages-display">--</span></span>
         </header>
 
-        <div id="page-content">
-            </div>
+        <div id="page-viewport">
+            <div id="visible-content"></div>
+            <div id="measure-chamber"></div>
+        </div>
 
         <div id="controls">
-            <button id="btn-next" class="read-btn" onclick="nextPage()">
+            <button id="btn-next" class="read-btn" onclick="turnPage(1)">
                 Read for more?
             </button>
 
             <div class="secondary-controls">
-                <button id="btn-prev" class="back-btn" onclick="prevPage()">Back</button>
+                <button id="btn-prev" class="back-btn" onclick="turnPage(-1)">Back</button>
 
                 <div style="display:flex; gap:5px;">
-                    <button class="text-btn" onclick="adjustSize(-2)" aria-label="Decrease font size">
+                    <button class="text-btn" onclick="resizeFont(-2)" aria-label="Decrease font size">
                         <i data-lucide="minus" width="14"></i> A
                     </button>
-                    <button class="text-btn" onclick="adjustSize(2)" aria-label="Increase font size">
+                    <button class="text-btn" onclick="resizeFont(2)" aria-label="Increase font size">
                         A <i data-lucide="plus" width="14"></i>
                     </button>
                 </div>
@@ -244,11 +172,8 @@
     </div>
 
     <script>
-        // --- 1. STORY DATA ---
-        // Paginated specifically for this story
-        const pages = [
-            // PAGE 1: Intro & Math
-            `
+        // 1. DATA: The Full Story as one block
+        const rawStoryHTML = `
             <h1 class="chapter-num">Short Story</h1>
             <h2 class="chapter-title">Cold Season</h2>
 
@@ -261,10 +186,7 @@
             <p>“Bye Alex.”</p>
             <p>Today me and my friends are meeting at my house: Shawn and Alisha. My first class is math. Math is my least favorite out of all the subjects and today we have a test. I need to get a good score on it.</p>
             <p>In just one week Alisha is inviting me to a trip to Norway. Shawn is allowed to go but I can’t; I’ve been doing bad on all of my tests. If I get an 85 or above my mom will let me go.</p>
-            `,
 
-            // PAGE 2: The Test
-            `
             <p class="no-indent">“Everyone, we have been studying for this test. I expect for you all to get a good score,” says Ms. G the math teacher.</p>
             <p>Me and probably all the other kids are stressing. I heard this test is extremely hard. Alisha doesn't need to do it because she's a grade down from me and Shawn.</p>
             <div class="scene-break">*** One hour later ***</div>
@@ -273,20 +195,14 @@
             <p>“Not sure, I hope I did good.”</p>
             <p>“Guys don’t leave me! Oh are we still going to Norway?”</p>
             <p>“My parents said yes as long as I call them regularly and be polite there," said Shawn.</p>
-            `,
 
-            // PAGE 3: Results & Planning
-            `
             <p class="no-indent">“Alex how about you?”</p>
             <p>“Only if I get a good score on this test.”</p>
             <p>“Well let's hope for the best!”</p>
             <p>Two regular days passed and I got an 85 on my test! Yay. We all go over to Shawn's house after he picks up his little sister, Molly, from her elementary school.</p>
             <p>“Follow me,” Shawn tells me and Alisha. We all go into his bedroom. Earlier we were talking about the vacation Alisha was letting us come on, so now we're planning it all out in a notebook Alisha brought over.</p>
             <p>“So we got our plane tickets and we get there then go into our rooms. What next?” says Alisha.</p>
-            `,
 
-            // PAGE 4: The Zoo & Packing
-            `
             <p class="no-indent">“I heard there's a zoo there. Maybe we can go and look at the animals over there,” I say.</p>
             <p>“Oooh yeh I wanna see the pandas there!” Shawn exclaimed.</p>
             <p>“Ok we’ll go to the zoo.”</p>
@@ -296,19 +212,13 @@
             <p>“Wow you barely passed but a deal is a deal.”</p>
             <p>“You'll soon be going on that trip with your friends in about two more days. You should start packing up.”</p>
             <p>“Ok I’ll start after dinner. I'm so glad it's winter break now I can rest and have no more homework.”</p>
-            `,
 
-            // PAGE 5: The Supermarket Snow
-            `
             <p class="no-indent">The next day me, Shawn, and Alisha go to the supermarket I work at. My boss asked if I could lock up for the night. I tell my friends to stay right by the door while I go do the things my boss asked me to do.</p>
             <p>It’s snowing outside and I don’t want them to be in the snow. It's about 2 inches. The weather forecast didn’t say anything about the snow getting more than 3 inches. A few minutes go by. I go back to tell my friends we’re going and I'm done but then I see outside.</p>
             <p>“I'm done, let's leave now… AGH how is there so much snow!” I exclaimed.</p>
             <p>Alisha and Shawn turn around.</p>
             <p>“Oh my gosh that's much more snow than earlier!” says Alisha.</p>
-            `,
 
-            // PAGE 6: Trapped
-            `
             <p class="no-indent">Shawn tries to open the door but it doesn't move.</p>
             <p>“Oh no! Are we trapped in here? This is not how I wanted to spend my winter break.”</p>
             <p>“It's fine the snow will stop soon. We just need to wait and relax. Someone will get us eventually,” I tell them.</p>
@@ -316,20 +226,14 @@
             <p>“I know this place like the back of my hand. Maybe there's something to help us.”</p>
             <p>I run to the back of the store and find a crowbar? <em>What in the world is a crowbar doing here?</em> I think to myself. I remember the door.</p>
             <p>“Guys I found a crowbar!”</p>
-            `,
 
-            // PAGE 7: The Escape Attempt
-            `
             <p class="no-indent">“Where did you find a crowbar?” says Alisha.</p>
             <p>“I don’t know it was just laying around in the back,” I tell her.</p>
             <p>“Well what are you doing, Alex? Open the door.”</p>
             <p><em>Please open please open,</em> I whisper to myself. The door opens and a blast of snow and wind comes at us. We all walk slowly through the snowstorm. Shawn's glasses have snow all over them and Alisha looks like a snow cone.</p>
             <p>“W-why is o-our car parked so far away?” Alisha says.</p>
             <p><em>Almost there,</em> I tell myself. We made it, but we are not inside yet. Shawn looks in his pockets, grabs the keys and tries to open the door.</p>
-            `,
 
-            // PAGE 8: Frozen & The Rescue
-            `
             <p class="no-indent">“I can’t unlock it! The handle is s-stuck!” shouts Shawn.</p>
             <p>“How can we get in the car if the handle is stuck?!!”</p>
             <p>“Should we go back in the store?” Alisha suggests.</p>
@@ -338,10 +242,7 @@
             <p>“What can we use to call? We have no internet on our phones.”</p>
             <p>“Alex, Shawn! I can text on my watch! Maybe I can tell my mom to pick us up by text!”</p>
             <p>“Well what are you waiting for?” I tell her. “Do it!”</p>
-            `,
 
-            // PAGE 9: Safety & Norway
-            `
             <p class="no-indent">A few minutes have passed and we all see car lights and Alisha's parents stepping out of the car.</p>
             <p>“Mom, Dad, thank goodness you're both here!”</p>
             <p>“Honey I was so worried, are you ok? Come on I'm taking your friends back to their houses.”</p>
@@ -351,8 +252,7 @@
             <p>She drops us all home and I say hello to my very worried mother. A few days after that we go on the vacation to Norway and we had loads of fun there.</p>
             <br>
             <h2 style="text-align:center;">The End</h2>
-            `
-        ];
+        `;
 
         const nextButtonMessages = [
             "Read for more?",
@@ -361,54 +261,108 @@
             "Turn page"
         ];
 
-        // --- 2. LOGIC ---
-
-        let currentPageIndex = 0;
+        // 2. STATE LOGIC
         let currentFontSize = 20;
+        let currentPageIndex = 0;
+        let pages = [];
 
-        // DOM Elements
-        const contentDiv = document.getElementById('page-content');
+        // DOM
+        const visibleContent = document.getElementById('visible-content');
+        const measureChamber = document.getElementById('measure-chamber');
+        const viewport = document.getElementById('page-viewport');
         const nextBtn = document.getElementById('btn-next');
         const prevBtn = document.getElementById('btn-prev');
         const pageNumDisplay = document.getElementById('page-num-display');
+        const totalPagesDisplay = document.getElementById('total-pages-display');
 
-        // Initialize Icons
         lucide.createIcons();
 
+        // 3. PAGINATION ALGORITHM (The Fix)
+        function paginateContent() {
+            // A. Convert String to Nodes
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(rawStoryHTML, 'text/html');
+            const elements = Array.from(doc.body.children);
+
+            // B. Reset
+            pages = [];
+            measureChamber.innerHTML = '';
+
+            // C. Get Max Height (Viewport - Padding)
+            // We use the computed style to ensure we subtract padding correctly
+            const viewportStyle = window.getComputedStyle(viewport);
+            const verticalPadding = parseFloat(viewportStyle.paddingTop) + parseFloat(viewportStyle.paddingBottom);
+            // The max height for content is the viewport height minus vertical padding
+            const maxHeight = viewport.clientHeight - verticalPadding;
+
+            let currentPageNodes = [];
+
+            elements.forEach(el => {
+                const clone = el.cloneNode(true);
+                measureChamber.appendChild(clone);
+
+                // D. Check Fit
+                // Since measureChamber has exact same padding as viewport,
+                // we check if content (scrollHeight) exceeds container height (maxHeight + padding)
+                // Actually, simplest way: Does scrollHeight exceed clientHeight of the container?
+
+                // Let's rely on the relative logic:
+                // Measure chamber is absolute, but usually expands to fit content.
+                // We check if the chamber's content height > allowed height.
+
+                if (measureChamber.scrollHeight > viewport.clientHeight) {
+                    // It overflows!
+                    if (currentPageNodes.length > 0) {
+                        pages.push(currentPageNodes);
+                    }
+
+                    // Reset for new page
+                    currentPageNodes = [];
+                    measureChamber.innerHTML = '';
+                    measureChamber.appendChild(clone); // Add the overflowing element to new page
+                    currentPageNodes.push(el);
+                } else {
+                    // It fits
+                    currentPageNodes.push(el);
+                }
+            });
+
+            // Save last page
+            if (currentPageNodes.length > 0) {
+                pages.push(currentPageNodes);
+            }
+            measureChamber.innerHTML = '';
+
+            // Validate index
+            if (currentPageIndex >= pages.length) currentPageIndex = pages.length - 1;
+
+            renderPage();
+        }
+
+        // 4. RENDERING
         function renderPage() {
-            // Fade out
-            contentDiv.style.opacity = 0;
+            visibleContent.style.opacity = 0;
 
             setTimeout(() => {
-                // Update content
-                contentDiv.innerHTML = pages[currentPageIndex];
+                visibleContent.innerHTML = '';
+                if (pages.length > 0) {
+                    const nodes = pages[currentPageIndex];
+                    nodes.forEach(node => visibleContent.appendChild(node.cloneNode(true)));
+                }
 
-                // Update Page Num
+                // UI Updates
                 pageNumDisplay.innerText = currentPageIndex + 1;
-
-                // Reset scroll
-                contentDiv.scrollTop = 0;
-
-                // Fade in
-                contentDiv.style.opacity = 1;
-
-                // Update Button States
+                totalPagesDisplay.innerText = pages.length;
+                visibleContent.style.opacity = 1;
                 updateControls();
-            }, 200);
+            }, 100);
         }
 
         function updateControls() {
-            // Handle Back Button
-            if (currentPageIndex === 0) {
-                prevBtn.disabled = true;
-                prevBtn.style.opacity = 0.5;
-            } else {
-                prevBtn.disabled = false;
-                prevBtn.style.opacity = 1;
-            }
+            prevBtn.disabled = currentPageIndex === 0;
+            prevBtn.style.opacity = currentPageIndex === 0 ? 0.5 : 1;
 
-            // Handle Next Button Text & State
-            if (currentPageIndex === pages.length - 1) {
+            if (currentPageIndex >= pages.length - 1) {
                 nextBtn.innerText = "End of Story";
                 nextBtn.disabled = true;
                 nextBtn.style.backgroundColor = "#888";
@@ -420,29 +374,30 @@
             }
         }
 
-        function nextPage() {
-            if (currentPageIndex < pages.length - 1) {
-                currentPageIndex++;
+        function turnPage(dir) {
+            const newIndex = currentPageIndex + dir;
+            if (newIndex >= 0 && newIndex < pages.length) {
+                currentPageIndex = newIndex;
                 renderPage();
             }
         }
 
-        function prevPage() {
-            if (currentPageIndex > 0) {
-                currentPageIndex--;
-                renderPage();
-            }
-        }
-
-        function adjustSize(delta) {
+        function resizeFont(delta) {
             currentFontSize += delta;
             if (currentFontSize < 14) currentFontSize = 14;
             if (currentFontSize > 32) currentFontSize = 32;
             document.documentElement.style.setProperty('--base-size', currentFontSize + 'px');
+            setTimeout(paginateContent, 50);
         }
 
-        // Start
-        renderPage();
+        // 5. INITIALIZATION
+        window.onload = () => paginateContent();
+
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(paginateContent, 100);
+        });
 
     </script>
 </body>
